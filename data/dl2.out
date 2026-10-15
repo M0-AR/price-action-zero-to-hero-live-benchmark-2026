@@ -1,2 +1,0 @@
-FAIL BTC-USD: fetch_daily(BTC-USD) failed after 4 tries: rate-limited (body='Too Many Requests')
-FAIL ETH-USD: fetch_daily(ETH-USD) failed after 4 tries: rate-limited (body='Too Many Requests')
