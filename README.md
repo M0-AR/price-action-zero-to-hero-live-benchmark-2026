@@ -16,7 +16,19 @@
 
 ![Interactive web page preview](assets/preview_shot.png)
 
-*▲ `preview.html` — the zero-install interactive site (guide + quiz + charts). [Publish it free in 1 minute](#-web-view--github-pages).*
+*▲ `preview.html` — the zero-install interactive site (guide + quiz + charts). [Open it live ↓](#-live-links-click-and-read) or [publish it free in 1 minute](#-web-view--github-pages).*
+
+## 🌐 Live links — click and read
+
+Once GitHub Pages is enabled ([1-minute setup](#-web-view--github-pages)), the site below is live. Pick whichever link matches your Pages source setting — the mirrors make every setting work:
+
+| Click | URL | Works when source is | Shows |
+|-------|-----|---------------------|-------|
+| 🏠 [Home `/`](https://M0-AR.github.io/price-action-zero-to-hero-live-benchmark-2026/) | `https://M0-AR.github.io/price-action-zero-to-hero-live-benchmark-2026/` | `/docs` (recommended) | Interactive benchmark (entry page) |
+| 📄 [`/preview.html`](https://M0-AR.github.io/price-action-zero-to-hero-live-benchmark-2026/preview.html) | `https://M0-AR.github.io/price-action-zero-to-hero-live-benchmark-2026/preview.html` | `/` (root) | Same interactive benchmark (mirror) |
+| 📁 [`/docs/preview.html`](https://M0-AR.github.io/price-action-zero-to-hero-live-benchmark-2026/docs/preview.html) | `https://M0-AR.github.io/price-action-zero-to-hero-live-benchmark-2026/docs/preview.html` | `/` (root) | Same interactive benchmark (canonical file) |
+
+> Rule of thumb: URL paths mirror repo paths *under the chosen source*. Source `/docs` → `docs/index.html` serves `/`. Source `/` → `preview.html` serves `/preview.html`. With both copies committed, you cannot pick wrong.
 
 ## Table of Contents
 
@@ -133,13 +145,21 @@ Outputs: `results/summary.json` (everything per symbol), `results/table.csv` (po
 
 1. Push this repo to GitHub.
 2. Open **Settings → Pages**.
-3. Under *Build and deployment*, select **Deploy from a branch**, branch **`main`**, folder **`/ (root)`** → **Save**.
-4. Within a minute or two your site is live at `https://<you>.github.io/<repo>/preview.html` — share that link anywhere (classroom, LinkedIn, resume).
+3. Under *Build and deployment*, select **Deploy from a branch**, branch **`main`**, folder **`/docs` (recommended)** → **Save**. (Folder `/` (root) works too — mirrors are committed for both.)
+4. Wait 1–2 min for the "pages build and deployment" run, then open your link from the [live-links table](#-live-links--click-and-read) — share it anywhere (classroom, LinkedIn, resume).
+
+Technical notes: an empty `.nojekyll` sits in both `/` and `/docs` so files serve exactly as committed; all asset paths are relative (`assets/…` from root pages, `../assets/…` from `/docs` pages); `index.html` files exist at both entry points, so `/` resolves under either source setting.
 
 ## 📁 Repository layout
 
 ```
-├── preview.html            # interactive site (guide + quiz + charts) — Pages-ready
+├── preview.html            # interactive site mirror (root source) — Pages-ready
+├── index.html              # root entry: redirects to preview.html + fallback links
+├── .nojekyll               # serve files exactly as committed (root + docs)
+├── docs/
+│   ├── index.html          # entry page for `/docs` source  (= preview)
+│   └── preview.html        # canonical page (…/assets → ../assets vs root)
+│   └── .nojekyll
 ├── assets/                 # GIF, charts, page screenshot (generated from results)
 ├── src/pa_bench/           # data.py (live loader) · patterns.py (14 detectors)
 │                           # backtest.py (costed engine) · metrics.py (stats)

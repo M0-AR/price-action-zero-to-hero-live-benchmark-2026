@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Price Action Zero-to-Hero — Verified on Live Data</title>
+<meta name="description" content="14 price-action claims, frozen into code and tested on 10,054 live market bars. Interactive results, beginner guide and quiz.">
+<style>
+:root{--bg:#0d1117;--panel:#161b22;--border:#30363d;--txt:#e6edf3;--dim:#8b949e;
+--green:#2ea043;--red:#f85149;--blue:#58a6ff;--gold:#d29922;--purple:#bc8cff}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;line-height:1.65}
+nav{position:sticky;top:0;z-index:10;background:rgba(13,17,23,.95);border-bottom:1px solid var(--border);padding:.7rem 1rem;display:flex;gap:1.1rem;flex-wrap:wrap;align-items:center}
+nav b{color:var(--gold)}nav a{color:var(--blue);text-decoration:none;font-size:.92rem}nav a:hover{text-decoration:underline}
+.wrap{max-width:960px;margin:0 auto;padding:2rem 1.2rem 4rem}
+.hero{text-align:center;padding:2.2rem 1rem;border:1px solid var(--border);border-radius:14px;background:radial-gradient(ellipse at 50% 0%,#1c2a1a 0%,var(--panel) 60%);margin-bottom:2rem}
+.hero h1{font-size:2rem;margin:.4rem 0}.hero p{color:var(--dim);max-width:640px;margin:.6rem auto}
+.badge{display:inline-block;border:1px solid var(--border);border-radius:20px;padding:.15rem .8rem;margin:.2rem;font-size:.82rem;background:#0d1117}
+.hero img{max-width:100%;border-radius:10px;border:1px solid var(--border);margin-top:1rem}
+.btn{display:inline-block;background:var(--green);color:#fff!important;padding:.7rem 1.6rem;border-radius:8px;text-decoration:none;font-weight:700;margin-top:1rem}
+.btn.ghost{background:transparent;border:1px solid var(--green);color:var(--green)!important}
+h2{margin:2.4rem 0 1rem;font-size:1.45rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+h3{margin:1.4rem 0 .5rem;color:var(--gold)}
+.card{border:1px solid var(--border);border-radius:10px;padding:1rem 1.2rem;margin:.8rem 0;background:var(--panel)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:.9rem}
+.verdict{font-weight:800;padding:.1rem .6rem;border-radius:6px;font-size:.8rem}
+.ok{background:rgba(46,160,67,.18);color:var(--green);border:1px solid var(--green)}
+.no{background:rgba(248,81,73,.15);color:var(--red);border:1px solid var(--red)}
+.mid{background:rgba(210,153,34,.15);color:var(--gold);border:1px solid var(--gold)}
+img.chart{max-width:100%;border:1px solid var(--border);border-radius:10px;margin:.8rem 0}
+ol.steps{list-style:none;counter-reset:s}ol.steps li{counter-increment:s;border:1px solid var(--border);border-radius:10px;padding:1rem 1.2rem 1rem 3.4rem;margin:.7rem 0;position:relative;background:var(--panel)}
+ol.steps li::before{content:counter(s);position:absolute;left:1rem;top:1rem;background:var(--blue);color:#04121f;font-weight:800;width:1.7rem;height:1.7rem;border-radius:50%;display:flex;align-items:center;justify-content:center}
+table{width:100%;border-collapse:collapse;margin:.8rem 0;font-size:.9rem}
+th,td{border:1px solid var(--border);padding:.5rem .6rem;text-align:left}th{background:#1c2128}
+.q{border:1px solid var(--border);border-radius:10px;padding:1rem;margin:.8rem 0;background:var(--panel)}
+.q p{font-weight:700}.q label{display:block;padding:.35rem .4rem;border-radius:6px;cursor:pointer}.q label:hover{background:#1c2128}
+.q .fb{margin-top:.5rem;font-size:.92rem;display:none}.q .fb.show{display:block}
+.q.correct{border-color:var(--green)}.q.wrong{border-color:var(--red)}
+#score{font-size:1.2rem;font-weight:800;margin-top:1rem}
+details{border:1px solid var(--border);border-radius:8px;padding:.7rem 1rem;margin:.6rem 0;background:var(--panel)}
+summary{cursor:pointer;font-weight:700;color:var(--blue)}
+code{background:#1c2128;padding:.1rem .4rem;border-radius:5px;font-size:.88em}
+pre{background:#1c2128;border:1px solid var(--border);border-radius:8px;padding:1rem;overflow-x:auto;font-size:.85rem}
+footer{color:var(--dim);font-size:.85rem;text-align:center;margin-top:3rem}
+.kbd{color:var(--dim)}
+</style>
+</head>
+<body>
+<nav><b>📊 PA-Zero-to-Hero</b><a href="#tl-dr">TL;DR</a><a href="#verdicts">Verdicts</a><a href="#charts">Charts</a><a href="#beginner">🌱 Beginner guide</a><a href="#quiz">🎯 Quiz</a><a href="#stories">User stories</a><a href="#reproduce">Reproduce</a><a href="#pages">Web view</a></nav>
+<div class="wrap">
+
+<div class="hero">
+<div><span class="badge">MIT License</span> <span class="badge">10,054 live bars</span> <span class="badge">11 experiments</span> <span class="badge">Python 3.12</span> <span class="badge">Docker ready</span></div>
+<h1>Price Action Zero-to-Hero,<br>Verified on Live Market Data</h1>
+<p>We took 14 famous trading-course claims, froze each one into code, added real trading costs, and tested them on ten years of real prices (2016–2026). Most claims failed. Four survived. Along the way the data revealed patterns the course never mentions.</p>
+<img src="../assets/demo.gif" alt="Animated SPY 2016-2026 equity sweep">
+<p class="kbd">▲ SPY 2016–2026: +260%. Every strategy in this repo must beat simply holding.</p>
+<a class="btn" href="#quiz">🎯 Test yourself: 10-question quiz</a>
+<a class="btn ghost" href="#beginner">🌱 Start from zero</a>
+</div>
+
+<h2 id="tl-dr">⚡ TL;DR — the 30-second version</h2>
+<div class="grid">
+<div class="card"><b>What works ✅</b><br>Breakouts after rising lows into resistance · pullbacks that wait for a confirmation candle · never fading the first bounce.</div>
+<div class="card"><b>What fails ❌</b><br>"90% of gaps fill" (it's 63–84%) · candlestick rankings · raw pin bars · small-range inside bars at support.</div>
+<div class="card"><b>What surprised us 🔬</b><br>Down days on huge volume bounce the <i>most</i> · downtrends snap back harder than uptrends drift · every breakout system pays a ~5% trap tax.</div>
+</div>
+
+<h2 id="verdicts">🧪 Verdicts — claim by claim</h2>
+<div class="grid">
+<div class="card"><span class="verdict ok">CONFIRMED</span> <b>Higher lows into resistance break out</b><br>Price breaks within 5 days 55–58% of the time vs 27–34% normally — on all four symbols.</div>
+<div class="card"><span class="verdict ok">CONFIRMED</span> <b>Wait for the rejection candle</b><br>Pullbacks with confirmation: profit factor 2.28 vs 1.41 for blind touches.</div>
+<div class="card"><span class="verdict ok">CONFIRMED</span> <b>Don't fade the first pullback</b><br>Fading it loses money out-of-sample (profit factor 0.80).</div>
+<div class="card"><span class="verdict no">REJECTED</span> <b>"90% of gaps fill"</b><br>Real fill rates: 63–84%, always in the same order (see chart).</div>
+<div class="card"><span class="verdict no">REJECTED</span> <b>Candlestick rankings</b><br>Hammers, marubozus and dojis predict nothing; only the shooting star leans bearish.</div>
+<div class="card"><span class="verdict no">REJECTED</span> <b>Raw pin bars &amp; small-range inside bars</b><br>Raw pins: PF 0.97 (coin flip). Small-range inside bars at value: PF 0.80.</div>
+<div class="card"><span class="verdict mid">INVERTED</span> <b>The volume doctrine</b><br>Down-days on high volume — taught as "bearish" — bounce the <i>most</i> (+0.37% to +0.95% in 5 days).</div>
+<div class="card"><span class="verdict mid">NUANCED</span> <b>Buildup beats chasing</b><br>Calm breakouts (PF 1.15) beat power-move chases (PF 0.84), but the edge is thin.</div>
+</div>
+
+<h2 id="charts">📈 The evidence (real charts from the run)</h2>
+<h3>Gap-fill gradient — the course slogan is wrong, the gradient is real</h3>
+<img class="chart" src="../assets/gap_gradient.png" alt="Gap fill rates by type across four symbols">
+<h3>Downtrends snap back hardest</h3>
+<img class="chart" src="../assets/regime_drift.png" alt="Five-day drift by trend regime">
+<h3>Volume inversion — capitulation bounces</h3>
+<img class="chart" src="../assets/volume_matrix.png" alt="Forward drift by price-volume cell">
+<h3>Candlesticks vs the base rate</h3>
+<img class="chart" src="../assets/candles_vs_base.png" alt="Candle shapes versus base next-day up-rate">
+
+<h2 id="beginner">🌱 Beginner guide — read this and you trade like a professional</h2>
+<p><i>Finish this section and the quiz below and you will know more about what actually works than most interview candidates.</i> Let's work this out step by step, from zero to pro:</p>
+<ol class="steps">
+<li><b>Step 1 — Prices move in three ways.</b> Up (higher highs and higher lows), down (lower highs and lower lows), or sideways. Everything else is decoration. Our code detects this with fractal swings — no opinions, just geometry.</li>
+<li><b>Step 2 — Big players leave footprints.</b> When buyers accept higher and higher prices into a ceiling (higher lows into resistance), price breaks out 55–58% of the time. That is the single most verified pattern in this study.</li>
+<li><b>Step 3 — Support and resistance are zones, not lines.</b> Prices turn inside <i>areas</i> about half an ATR wide. Drawing a razor-thin line and putting your stop one tick behind it is why beginners get "hunted".</li>
+<li><b>Step 4 — Candles describe, they don't predict.</b> A hammer tells you buyers fought back <i>today</i>. It says almost nothing about tomorrow (verified: ≈ base rate). Trade the <i>reaction at a level</i>, never the candle alone.</li>
+<li><b>Step 5 — Volume marks exhaustion, not confirmation.</b> The heaviest down-days bounce the hardest. Panic is loud; the bounce after panic is the trade, not the panic itself.</li>
+<li><b>Step 6 — Confirmation is the cheapest edge in trading.</b> Waiting one bar for a rejection candle lifted pullback profit factor from 1.41 to 2.28. Patience is a strategy with a measured return.</li>
+<li><b>Step 7 — Costs and out-of-sample kill fantasies.</b> Every backtest here pays commission + slippage and is judged on data it never trained on. Any "strategy" that skips this is a story, not a strategy.</li>
+</ol>
+
+<h2 id="quiz">🎯 Interactive quiz — from scratch to pro</h2>
+<p>Answer all 10. Each answer explains <i>why</i>, with the measured number. Score 8+ and you think like a professional quant.</p>
+<div id="quizbox"></div>
+<button class="btn" onclick="grade()">Check my score</button>
+<div id="score"></div>
+
+<h2 id="stories">👥 Who is this for? (user stories)</h2>
+<div class="grid">
+<div class="card"><b>🎓 The self-taught trader</b><br>"I finished a free course — what actually works?" Run the quiz, read the verdicts, steal the 3 confirmed setups and ignore the rest.</div>
+<div class="card"><b>💼 The interview candidate</b><br>"I need to sound like I understand backtesting." The beginner guide + limitations section teach lookahead bias, overfitting, IS/OOS and costs with real numbers.</div>
+<div class="card"><b>🔬 The quant researcher</b><br>"I need a baseline harness." Fork it: detectors in <code>src/pa_bench/patterns.py</code>, costed engine in <code>backtest.py</code>, 70/30 split runner in <code>experiments/run_all.py</code>.</div>
+<div class="card"><b>👨‍🏫 The educator</b><br>"I want a live demo for class." Open this page, play the GIF, run the quiz — zero installs, every claim linked to a number.</div>
+<div class="card"><b>🛡️ The skeptic</b><br>"Prove trading courses wrong." Every failure is published with n, win rate and p-values. Losers are losers here.</div>
+<div class="card"><b>🧑‍💻 The open-source contributor</b><br>"I want to extend it." Add a symbol CSV to <code>data/</code>, rerun one command, open a PR with your table. Crypto/FX slots are waiting.</div>
+</div>
+
+<h2 id="reproduce">🔁 Reproduce everything in 3 commands</h2>
+<pre>docker compose up research
+# or locally:
+pip install -r requirements.txt
+PYTHONPATH=src python3 experiments/run_all.py --symbols SPY,QQQ,AAPL,MSFT --range 10y
+python3 -m pytest tests/ -q   # 3 offline smoke tests</pre>
+<p>Outputs land in <code>results/summary.json</code>, <code>results/table.csv</code>, <code>results/SUMMARY.md</code>. Full paper: <code>README.md</code>. Method protocol: <code>papers/METHOD.md</code>. MIT licensed — use it for anything.</p>
+
+<h2 id="pages">🌐 Web view (GitHub Pages)</h2>
+<div class="card">This page <i>is</i> the file <code>preview.html</code> at the repo root — no build step, no dependencies, works offline. To publish it: push the repo to GitHub → <b>Settings → Pages → Deploy from a branch → branch <code>main</code>, folder <code>/ (root)</code> → Save</b>. Your site goes live at <code>https://&lt;you&gt;.github.io/&lt;repo&gt;/preview.html</code> within a minute or two. Share that link anywhere.</div>
+
+<h2>❓ FAQ</h2>
+<details><summary>So… can I get rich with the 3 confirmed setups?</summary>Probably not directly — edges are small after costs (profit factors 1.2–2.3) and this is daily-bar, educational research, not financial advice. The value is knowing what <i>not</i> to pay for.</details>
+<details><summary>Why do down-days bounce?</summary>Mean-reversion on daily equities: panic exhausts sellers and the bounce follows: our DU cell (down + high volume) leads 5-day drift on all four symbols (+0.37% to +0.95%).</details>
+<details><summary>What is a hikkake / trap tax?</summary>About 5% of bars are failed inside-bar breakouts that trap breakout traders. Any breakout system pays this base rate before costs — size positions accordingly.</details>
+<details><summary>Can I add my own strategy?</summary>Yes: write a detector returning a boolean Series (signal at close t), pass it to <code>backtest_signals</code>, and the harness handles costs, OOS split and stats. See <code>experiments/run_all.py</code> E07 for the template.</details>
+
+<footer>Price Action Zero-to-Hero Verification Benchmark · MIT License · 10,054 live bars · Losers published as losers.</footer>
+</div>
+
+<script>
+const QUIZ=[
+{q:"Rising lows pushing into a flat resistance (higher lows into resistance)…",o:["means nothing — coin flip","breaks out within 5 days ~56% of the time (vs ~30% normally)","always fails"],a:1,
+w:"Verified on all four symbols: 55–58% vs a 27–34% base rate. The study's strongest confirmation."},
+{q:"A hammer candle at support tells you…",o:["tomorrow will go up","only that buyers fought back today — tomorrow ≈ base rate","tomorrow will go down"],a:1,
+w:"Hammers, marubozus and dojis all land within noise of the base next-day up-rate (~54–56%)."},
+{q:"Which gap fills most often within 5 days?",o:["Full gap up","Partial gap up","Partial gap down"],a:2,
+w:"Partial gap-downs fill 81–84%; full gap-ups only 63–69%. The '90% fill everything' slogan is false."},
+{q:"A heavy down-day on huge volume is…",o:["bearish — time to sell","the best bounce setup in the data","irrelevant"],a:1,
+w:"Down + high volume leads 5-day drift on every symbol (+0.37% to +0.95%). Capitulation marks exhaustion."},
+{q:"Waiting one bar for a confirmation candle on pullbacks…",o:["wastes the move","lifted profit factor 1.41 → 2.28","only works in crypto"],a:1,
+w:"The cheapest measured edge in the course: confirmation beats blind touches, in-sample and out-of-sample."},
+{q:"Fading (buying) the very first bounce after a drop…",o:["is the best reversal entry","loses money out-of-sample (PF 0.80)","has never been tested"],a:1,
+w:"Fade-first longs: expectancy −0.15R out-of-sample. The course's warning is validated."},
+{q:"Raw pin bars (long wick, tiny body)…",o:["print money","are a coin flip (PF 0.97)","work only on Mondays"],a:1,
+w:"876 raw pin trades, profit factor 0.97. Trend/value filters lift it only to 1.05."},
+{q:"About what share of bars are failed inside-bar breakouts (traps)?",o:["~0.1%","~5%","~40%"],a:1,
+w:"2.2–2.8% per side, ≈5% total. That is the base 'trap tax' every breakout system pays before costs."},
+{q:"Why must a backtest charge costs and keep out-of-sample data?",o:["It mustn't — it lowers returns","Because costs and overfitting turn most 'edges' negative on unseen data","Only regulators care"],a:1,
+w:"Ignoring costs and re-tuning on the test set is how Type-III errors are manufactured. This repo does neither."},
+{q:"After a downtrend regime, the next 5 days on average…",o:["keep falling hard","drift up the most (snap-back)","go exactly sideways"],a:1,
+w:"Down-regime forward drift beat up-regime drift on all four symbols — daily equities mean-revert."}];
+const box=document.getElementById('quizbox');
+QUIZ.forEach((it,i)=>{
+let d=document.createElement('div');d.className='q';d.id='q'+i;
+d.innerHTML='<p>'+(i+1)+'. '+it.q+'</p>'+it.o.map((o,j)=>'<label><input type="radio" name="q'+i+'" value="'+j+'"> '+o+'</label>').join('')+'<div class="fb" id="f'+i+'"></div>';
+box.appendChild(d);});
+function grade(){let s=0;QUIZ.forEach((it,i)=>{let sel=document.querySelector('input[name=q'+i+']:checked');let d=document.getElementById('q'+i);let f=document.getElementById('f'+i);d.classList.remove('correct','wrong');
+if(sel&&+sel.value===it.a){s++;d.classList.add('correct');f.innerHTML='✅ Correct. '+it.w;}else{d.classList.add('wrong');f.innerHTML='❌ Not quite. '+it.w;}f.classList.add('show');});
+let rank=s>=9?'🏆 Professional quant':s>=7?'📈 Solid practitioner':s>=5?'🌱 Promising beginner':'🔰 Start with the beginner guide above';
+document.getElementById('score').textContent='You scored '+s+' / '+QUIZ.length+' — '+rank;
+document.getElementById('score').scrollIntoView({behavior:'smooth',block:'center'});}
+</script>
+</body>
+</html>
