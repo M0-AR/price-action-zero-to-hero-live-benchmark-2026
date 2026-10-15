@@ -1,0 +1,8 @@
+# Verified live via Yahoo Finance chart API v8 (query2 + browser UA) on 2026-10-15.
+# Pinned for reproducibility; see papers/METHOD.md for data provenance.
+pandas>=2.0
+numpy>=1.26
+scipy>=1.11
+matplotlib>=3.8
+pyyaml>=6.0
+pytest>=8.0

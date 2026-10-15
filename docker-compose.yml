@@ -1,0 +1,21 @@
+services:
+  research:
+    build: .
+    container_name: pa-zero-to-hero-bench
+    volumes:
+      - ./data:/app/data
+      - ./results:/app/results
+    environment:
+      PYTHONPATH: /app/src
+    command: python3 experiments/run_all.py
+  notebook:
+    build: .
+    container_name: pa-zero-to-hero-notes
+    volumes:
+      - ./data:/app/data
+      - ./results:/app/results
+    ports:
+      - "8888:8888"
+    environment:
+      PYTHONPATH: /app/src
+    command: python3 -m http.server 8888
