@@ -5,3 +5,6 @@ data/*.csv
 !data/.gitkeep
 results/*
 !results/.gitkeep
+
+*.out
+*.log

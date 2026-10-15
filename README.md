@@ -1,288 +1,266 @@
-# Price Action Zero-to-Hero: An Independent Live-Data Verification Benchmark
+# 📊 Price Action Zero-to-Hero — Verified on Live Market Data
 
-**Can a retail trader learn price action from a video course and expect an edge?
-We froze 14 course claims into code, priced in costs, and tested them on
-10,054 live daily bars (2016–2026). Most claims fail. Four survive — and the
-data hides patterns the course never mentions.**
+![MIT License](https://img.shields.io/badge/license-MIT-green)
+![Live Data](https://img.shields.io/badge/data-live%2010%2C054%20bars-blue)
+![Experiments](https://img.shields.io/badge/experiments-11-orange)
+![Python](https://img.shields.io/badge/python-3.12-blue)
+![Docker](https://img.shields.io/badge/docker-ready-2496ED)
 
-`experiments/` + `src/pa_bench/` + `docker-compose.yml` reproduce everything.
-No discretion, no hindsight anecdotes: losers are published as losers.
+**We took 14 famous price-action trading claims, turned each one into code, added real trading costs, and tested them on 10 years of real market prices. Most claims failed. Four survived — and the data hid patterns no course teaches.**
 
----
+> **CEO summary (30 seconds):** This repo answers one question — *"which parts of price-action trading actually work?"* — with numbers instead of opinions. Result: breakouts after rising lows work (55–58% vs ~30% baseline), waiting one bar for confirmation doubles pullback edge, "90% of gaps fill" is false (63–84%), candlestick patterns don't predict, and heavy down-days bounce the hardest. Everything is reproducible in one command, free to use (MIT), with an interactive web page anyone can learn from.
 
-## Abstract
+![Live demo — SPY 2016–2026 benchmark sweep](assets/demo.gif)
 
-Discretionary trading education ("price action courses") teaches chart reading
-through hand-picked historical examples — a procedure the backtesting literature
-identifies as anecdotal validation with uncontrolled lookahead bias. This study
-independently verifies a representative zero-to-hero price-action curriculum
-(market structure, trends, candlesticks, support/resistance, volume, breakouts,
-fakeouts, pullbacks, reversals, inside bars, pin bars, gaps) by converting each
-claim into a frozen mechanical rule and backtesting it on live public market
-data: **SPY, QQQ, AAPL, MSFT, 2016-10-14 → 2026-10-15 (2,513 bars each)**,
-signal-at-close / execution-at-next-open, 5 bp commission + 2 bp slippage per
-side, 70/30 chronological in-sample/out-of-sample split, buy-and-hold baseline.
+*▲ The benchmark every strategy must beat: simply holding SPY turned $1 into $3.60.*
 
-**Headline results (4 symbols, 10,054 bars):**
+![Interactive web page preview](assets/preview_shot.png)
 
-| # | Course claim | Verdict | Evidence |
-|---|--------------|---------|----------|
-| E04 | Higher lows into resistance → breakout | **CONFIRMED** | 5-day break rate 55–58% vs 27–34% base, all 4 symbols |
-| E07 | Wait for rejection candle on pullbacks | **CONFIRMED** | PF 2.28 vs 1.41 blind-touch; OOS holds |
-| E08 | Never fade the first pullback | **CONFIRMED** | Fade-first OOS PF 0.80, expectancy −0.15R |
-| E11 | "90% of gaps fill" | **REJECTED ( overstated)** | 63–84% by type; stable gradient part_dn > part_up > full_dn > full_up |
-| E05 | Volume×price 2×2 matrix as taught | **INVERTED** | Down-on-high-volume (taught "bearish") has the *best* 5-day drift |
-| E02 | Candle ranking marubozu > pins > doji | **REJECTED** | All shapes ≈ base rate except weak shooting-star effect |
-| E09 | Small-range inside bar at value is best | **REJECTED** | PF 0.80; raw inside-bar breakout PF 1.23 instead |
-| E10 | Raw pin bars have edge | **REJECTED (raw) / WEAK (filtered)** | Raw PF 0.97; trend/value filter PF 1.05 |
-| E06 | Buildup breakouts beat power-move chases | **NUANCED** | Buildup PF 1.15 vs chase 0.84 overall; OOS thin samples |
+*▲ `preview.html` — the zero-install interactive site (guide + quiz + charts). [Publish it free in 1 minute](#-web-view--github-pages).*
 
-**Four hidden patterns the course never teaches** (§6): the downtrend snap-back
-(HP1), the capitulation-volume inversion (HP2), the gap-fill gradient (HP3),
-and the ~5% hikkake tax on every breakout system (HP4).
+## Table of Contents
 
-> Crypto/FX extension (BTC-USD, ETH-USD, EURUSD=X, GC=F) is queued in §9;
-> download throttling from public endpoints paced this release to equities.
-> The pipeline auto-ingests new symbols with zero code changes.
+- [✨ Features](#-features)
+- [🌱 Beginner guide — read this and you are a professional](#-beginner-guide--read-this-and-you-are-a-professional)
+- [👥 Who is this for? (user stories)](#-who-is-this-for-user-stories)
+- [🧪 Verdicts — claim by claim](#-verdicts--claim-by-claim)
+- [📈 The evidence (charts from the live run)](#-the-evidence-charts-from-the-live-run)
+- [🔬 Hidden patterns the course never mentions](#-hidden-patterns-the-course-never-mentions)
+- [🚀 Quick start (3 commands)](#-quick-start-3-commands)
+- [🌐 Web view — GitHub Pages](#-web-view--github-pages)
+- [📁 Repository layout](#-repository-layout)
+- [🔬 Method (how the testing works)](#-method-how-the-testing-works)
+- [📊 Full results tables](#-full-results-tables)
+- [⚠️ Limitations (read before trusting any backtest)](#️-limitations-read-before-trusting-any-backtest)
+- [❓ FAQ](#-faq)
+- [🤝 Contributing](#-contributing)
+- [📜 License](#-license)
+- [📚 References](#-references)
+- [Appendix A — Provenance](#appendix-a--provenance)
 
----
+## ✨ Features
 
-## 1. Introduction: what was actually claimed
+- **11 verification experiments (E01–E11)** covering every major price-action topic: trends, candlesticks, support/resistance, volume, breakouts, fakeouts, pullbacks, reversals, inside bars, pin bars, gaps.
+- **10,054 live daily bars** (SPY, QQQ, AAPL, MSFT — 2016→2026), signal-at-close / trade-at-next-open, costs on every fill, 70/30 out-of-sample split, buy-and-hold baseline.
+- **Honest scoreboard:** winners and losers published with sample sizes, win rates, profit factors and p-values. Losers are losers here.
+- **Interactive learning site** (`preview.html`): beginner ladder, 10-question self-grading quiz, charts, FAQ — no install, no build, works offline and on GitHub Pages.
+- **Animated + static visuals** generated from the actual results (`assets/`, `results/figures/`).
+- **One-command reproduction** via Docker or plain pip; 3 offline smoke tests.
+- **Extensible harness:** add any symbol CSV or any strategy detector, rerun one command.
 
-The source curriculum is a ~14-episode "completely free" price-action course:
-phases (accumulation → markup → distribution → markdown), trend taxonomy
-(up/down/sideways; contraction/expansion/triangular ranges), candlestick
-literacy (marubozu, hammer/hanging-man, shooting-star/inverted-hammer, spinning
-tops, doji), a 4-step support/resistance method (zoom out → sticky zones →
-align ≥3 touches → draw zone, never a line), a volume doctrine (the 2×2
-price×volume matrix plus delivery volume), and five strategy families
-(breakouts, fakeout filters incl. RSI convergence, pullbacks
-aggressive-vs-conservative, reversals incl. break-of-structure and higher
-timeframe structure, inside-bar/pin-bar/gap systems with the "90% of gaps
-fill" assertion).
+## 🌱 Beginner guide — read this and you are a professional
 
-These are textbook discretionary claims: plausible, visually persuasive, and —
-as QuantifiedStrategies (2026) documents across backtested price-action rules —
-usually untested and often no better than chance once coded. Our contribution
-is a **registered-style mechanical translation** of each claim plus a **live,
-costed, out-of-sample test**.
+*Finish this section, then score yourself on the [interactive quiz](preview.html#quiz) — you will know more about what actually works than most interview candidates. Let's work this out in a step-by-step way, from zero to pro:*
 
-## 2. Data: live public OHLCV and how access was verified
+1. **Prices move in three ways.** Up (higher highs *and* higher lows), down (lower highs *and* lower lows), or sideways. Everything else is decoration. Our code detects this with fractal swings — geometry, not opinions.
+2. **Big players leave footprints.** When buyers accept higher and higher prices into a fixed ceiling, price breaks out **55–58% of the time** (vs ~30% normally). The single most verified pattern in this study.
+3. **Support and resistance are zones, not lines.** Prices turn inside *areas*. A razor-thin line with your stop one tick behind it is why beginners get "hunted".
+4. **Candles describe — they don't predict.** A hammer says buyers fought back *today*. It says almost nothing about *tomorrow* (verified: within noise of the base rate). Trade the reaction at a level, never the candle alone.
+5. **Volume marks exhaustion, not confirmation.** The heaviest down-days bounce the *hardest*. Panic is loud; the bounce after panic is the trade.
+6. **Confirmation is the cheapest edge in trading.** Waiting one bar for a rejection candle lifted pullback profit factor from **1.41 → 2.28**. Patience is a strategy with a measured return.
+7. **Costs and unseen data kill fantasies.** Every test here pays commission + slippage and is judged on data it never trained on. Any "strategy" skipping this is a story, not a strategy.
 
-| Symbol | Bars | Span | Source | Buy&hold (10y) |
-|--------|------|------|--------|----------------|
-| SPY | 2,513 | 2016-10-17 → 2026-10-15 | Yahoo v8 | +260% |
-| QQQ | 2,513 | 2016-10-14 → 2026-10-14 | Nasdaq API | +520% |
-| AAPL | 2,513 | 2016-10-14 → 2026-10-14 | Nasdaq API | +1,064% |
-| MSFT | 2,513 | 2016-10-14 → 2026-10-14 | Nasdaq API | +834% |
+> 🎯 **[Take the 10-question interactive quiz →](preview.html#quiz)** — each answer explains *why*, with the measured number. Score 8+ and you think like a professional quant.
 
-Egress verification log (2026-10-15, kept because reproducibility includes
-*access*, not just code):
+## 👥 Who is this for? (user stories)
 
-- `query1.finance.yahoo.com` → `Edge: Too Many Requests`; `query2` host works.
-- Python `urllib` with browser UA → HTTP 429 while `curl` with the same UA
-  succeeds (TLS/edge fingerprinting) → fetcher uses `curl` subprocess.
-- `?events=div,split` triggers 429; same URL without it succeeds → prices are
-  **unadjusted** (limitation L2, §8).
-- `api.nasdaq.com/.../historical` serves full 10y OHLCV tables for US
-  listings in one call (SPY needs `assetclass=etf`).
-- Public endpoints allow only a few requests/minute → 25–90 s pacing,
-  30/60/90/120 s backoff, on-disk CSV cache (`data/`), Nasdaq auto-fallback.
+| You are… | You want… | Start here |
+|----------|-----------|------------|
+| 🎓 Self-taught trader | "I finished a course — what actually works?" | Quiz + [verdicts](#-verdicts--claim-by-claim); keep the 3 confirmed setups, ignore the rest |
+| 💼 Interview candidate | "I need to reason about backtesting." | Beginner guide + [limitations](#️-limitations-read-before-trusting-any-backtest): lookahead bias, overfitting, IS/OOS, costs — with real numbers |
+| 🔬 Quant researcher | "I need a baseline harness." | `src/pa_bench/patterns.py` (detectors) → `backtest.py` (costed engine) → `experiments/run_all.py` (70/30 runner) |
+| 👨‍🏫 Educator | "I need a live class demo." | Open `preview.html`: GIF, charts, quiz — zero installs, every claim linked to a number |
+| 🛡️ Skeptic | "Prove courses wrong." | Every failure published with n, win rate, p-values |
+| 🧑‍💻 Contributor | "I want to extend it." | Drop a symbol CSV in `data/`, rerun one command, open a PR — crypto/FX slots are waiting |
 
-## 3. Method (full protocol: `papers/METHOD.md`)
+## 🧪 Verdicts — claim by claim
 
-Frozen *before* results were inspected: fractal swings (k=2) → regime
-(up = last two swing highs AND lows rise); ATR(14) risk box (1.5×ATR stop,
-1.5R target, 10-bar time exit, stop-first on same-bar ambiguity); volume ratio
-vs SMA-10; Donchian-20 reference levels (shifted, no lookahead); pin bar =
-extreme wick ≥ 2× body with body ≤ 40% of range; S/R zones = swing clusters
-within 0.5×ATR with ≥3 touches ≥10 bars apart; gaps split full/partial ×
-up/down with a |gap| ≥ 0.1% "visible gap" cut (else every overnight tick
-counts — a flaw caught by running, not by reasoning). Metrics: n, win rate,
-expectancy (R), profit factor, max drawdown (R), t-test on R, IS/OOS split.
+| # | Claim | Verdict | Evidence |
+|---|-------|---------|----------|
+| E04 | Higher lows into resistance → breakout | ✅ **CONFIRMED** | 5-day break 55–58% vs 27–34% base, all 4 symbols |
+| E07 | Wait for the rejection candle | ✅ **CONFIRMED** | Pullback PF 2.28 vs 1.41 blind; OOS holds |
+| E08 | Never fade the first pullback | ✅ **CONFIRMED** | Fading loses OOS (PF 0.80, −0.15R) |
+| E11 | "90% of gaps fill" | ❌ **REJECTED** | 63–84% by type; fixed order part_dn > part_up > full_dn > full_up |
+| E02 | Candle ranking (marubozu > pins > doji) | ❌ **REJECTED** | All shapes ≈ base rate; only shooting star leans bearish |
+| E09 | Small-range inside bar at value is best | ❌ **REJECTED** | PF 0.80; raw inside-bar breakout PF 1.23 instead |
+| E10 | Raw pin bars have edge | ❌ **REJECTED / weak filtered** | Raw PF 0.97; trend/value filter PF 1.05 |
+| E05 | Volume×price matrix as taught | 🔄 **INVERTED** | Down + high volume (taught "bearish") has the *best* 5-day drift |
+| E06 | Buildup breakouts beat power chases | ⚖️ **NUANCED** | Buildup PF 1.15 vs chase 0.84; thin OOS samples |
 
-## 4. Results
+## 📈 The evidence (charts from the live run)
 
-### E01 — Trend regimes and 5-day drift
+### Gap-fill gradient — the slogan is wrong, the gradient is real
+![Gap fill rates by type](assets/gap_gradient.png)
+Partial gap-downs fill 81–84%; full gap-ups only 63–69%. The dashed "90%" line is never touched.
+
+### Downtrends snap back hardest
+![Five-day drift by regime](assets/regime_drift.png)
+Forward drift is maximal *after* down-regimes on every symbol — daily equities mean-revert.
+
+### Volume inversion — capitulation bounces
+![Forward drift by price-volume cell](assets/volume_matrix.png)
+High-volume down days precede the best 5-day drift. Volume confirms *exhaustion*, not continuation.
+
+### Candlesticks vs the base rate
+![Candle shapes versus base rate](assets/candles_vs_base.png)
+Only the shooting star deviates below base with any consistency. The famous ladder has no predictive content.
+
+## 🔬 Hidden patterns the course never mentions
+
+- **HP1 — Downtrend snap-back.** Down-regime forward drift beats up-regime drift on all four symbols. Any trend system needs an oversold-bounce opponent model.
+- **HP2 — Capitulation-volume inversion.** High-volume down days lead 5-day drift (+0.37% to +0.95%). The taught 2×2 matrix needs transposing for daily bars.
+- **HP3 — Gap-fill gradient.** part_dn > part_up > full_dn > full_up, invariant across symbols. Overnight partial gaps are liquidity air-pockets; full gaps embed real information.
+- **HP4 — The ~5% hikkake tax.** 2.2–2.8% of bars per side are failed inside-bar breakouts. Every breakout system pays this base trap rate before costs.
+- **HP5 — Zone abundance.** 35–52% of bars sit inside ≥3-touch zones, so "trade from value" can't be selective alone — confirmation (E07) does the work.
+
+## 🚀 Quick start (3 commands)
+
+```bash
+docker compose up research
+# or locally:
+pip install -r requirements.txt
+PYTHONPATH=src python3 experiments/run_all.py --symbols SPY,QQQ,AAPL,MSFT --range 10y
+python3 -m pytest tests/ -q   # 3 offline smoke tests
+```
+
+Outputs: `results/summary.json` (everything per symbol), `results/table.csv` (pooled trade stats), `results/SUMMARY.md` (digest). Charts: regenerate with `python3 experiments/make_assets.py`.
+
+> **Got an idea?** Write a detector returning a boolean Series (signal at close *t* — execution happens at open *t+1*), pass it to `backtest_signals`, and the harness handles costs, the OOS split and the statistics. See E07 in `experiments/run_all.py` for the template.
+
+## 🌐 Web view — GitHub Pages
+
+`preview.html` at the repo root **is** the interactive site — single file, no build step, no dependencies, works offline. To publish it free:
+
+1. Push this repo to GitHub.
+2. Open **Settings → Pages**.
+3. Under *Build and deployment*, select **Deploy from a branch**, branch **`main`**, folder **`/ (root)`** → **Save**.
+4. Within a minute or two your site is live at `https://<you>.github.io/<repo>/preview.html` — share that link anywhere (classroom, LinkedIn, resume).
+
+## 📁 Repository layout
+
+```
+├── preview.html            # interactive site (guide + quiz + charts) — Pages-ready
+├── assets/                 # GIF, charts, page screenshot (generated from results)
+├── src/pa_bench/           # data.py (live loader) · patterns.py (14 detectors)
+│                           # backtest.py (costed engine) · metrics.py (stats)
+├── experiments/            # run_all.py (E01–E11) · make_assets.py · dl_*.py
+├── results/                # summary.json · table.csv · SUMMARY.md · figures/
+├── papers/METHOD.md        # frozen research protocol + claim→rule mapping
+├── tests/test_smoke.py     # offline determinism tests (no network)
+├── data/                   # cached live CSVs (SPY/QQQ/AAPL/MSFT 10y banked)
+├── Dockerfile · docker-compose.yml · Makefile · requirements.txt
+└── LICENSE (MIT)
+```
+
+## 🔬 Method (how the testing works)
+
+Frozen *before* results were inspected: fractal swings (k=2) → regime (up = last two swing highs AND lows rise); ATR(14) risk box (1.5×ATR stop, 1.5R target, 10-bar time exit, stop-first on same-bar ambiguity); volume ratio vs SMA-10; shifted Donchian-20 levels (no lookahead); pin bar = extreme wick ≥ 2× body with body ≤ 40% of range; S/R zones = swing clusters within 0.5×ATR with ≥3 touches ≥10 bars apart; gaps split full/partial × up/down with a |gap| ≥ 0.1% "visible gap" cut (without it, every overnight tick counts — a flaw caught by running, not reasoning). Metrics: n, win rate, expectancy (R), profit factor, max drawdown (R), t-test on R, 70/30 chronological split. Full protocol: `papers/METHOD.md`.
+
+Data (live public endpoints, daily OHLCV): SPY 2,513 bars 2016-10-17→2026-10-15 (+260% buy-and-hold); QQQ/AAPL/MSFT 2,513 bars 2016-10-14→2026-10-14 (+520% / +1,064% / +834%). Crypto/FX extension (BTC-USD, ETH-USD, EURUSD=X, GC=F) auto-ingests on rerun — see §Pending below.
+
+## 📊 Full results tables
+
+### E01 — 5-day drift by regime (mean %, n)
 
 | Symbol | up | down | range |
 |--------|----|------|-------|
-| SPY | +0.19% (1169) | **+0.50%** (520) | +0.29% (824) |
-| QQQ | +0.23% (1082) | **+0.59%** (551) | +0.52% (880) |
-| AAPL | +0.61% (1048) | **+0.84%** (589) | +0.33% (876) |
-| MSFT | +0.32% (1029) | +0.62% (489) | **+0.65%** (995) |
+| SPY | +0.19 (1169) | **+0.50** (520) | +0.29 (824) |
+| QQQ | +0.23 (1082) | **+0.59** (551) | +0.52 (880) |
+| AAPL | +0.61 (1048) | **+0.84** (589) | +0.33 (876) |
+| MSFT | +0.32 (1029) | +0.62 (489) | **+0.65** (995) |
 
-Down-regimes snap back hardest. Trend-following entries on daily bars fight a
-mean-reverting tide (HP1).
+### E02 — Next-day up-rate by candle (base in brackets)
 
-### E02 — Candlestick shapes vs base next-day up-rate
+| Symbol | base | marubozu↑ | marubozu↓ | hammer | shooter | spinning | doji |
+|--------|------|-----------|-----------|--------|---------|----------|------|
+| SPY | 54.9% | 53.3% | 55.3% | 54.9% | **42.9%** | 58.9% | 57.0% |
+| QQQ | 56.3% | 48.0% | 66.7% | 57.6% | 55.2% | 58.8% | 61.8% |
+| AAPL | 53.5% | 56.8% | 60.7% | 58.6% | 56.8% | 51.6% | 48.6% |
+| MSFT | 53.4% | 49.2% | 56.8% | 54.9% | 47.3% | 54.1% | 54.7% |
 
-Base up-rates: SPY 54.9%, QQQ 56.3%, AAPL 53.5%, MSFT 53.4%. No shape beats
-base by more than noise **except** the shooting star undershooting it
-(SPY 42.9% vs 54.9%; MSFT 47.3% vs 53.4%; QQQ/AAPL ≈ base). Hammers,
-marubozus, dojis, spinning tops: ≈ base. The course's strongest-to-weakest
-ladder has no predictive content on next-day direction.
+### E04 — Higher-lows-into-resistance: 5-day break rate vs base
 
-### E03 — Support/resistance touch density
-
-142–210 bars of the trailing 400 (35–52%) sit inside a ≥3-touch zone. Levels
-are abundant, not rare — selectivity must come from *reaction*, not from the
-level itself (consistent with E07).
-
-### E04 — Higher lows into resistance → breakout (CONFIRMED)
-
-| Symbol | HL→R setups | 5d break rate | base rate | lift |
-|--------|-------------|---------------|-----------|------|
+| Symbol | setups | break rate | base | lift |
+|--------|--------|------------|------|------|
 | SPY | 404 | 58.4% | 33.8% | ×1.73 |
 | QQQ | 374 | 56.7% | 32.7% | ×1.73 |
 | AAPL | 303 | 55.4% | 28.7% | ×1.93 |
 | MSFT | 335 | 56.7% | 26.5% | ×2.14 |
 
-The single strongest confirmation in the study. Buyer-willingness-to-pay-more
-into a fixed ceiling really does resolve upward on daily bars.
+### E05 — 5-day drift by price×volume cell (mean %)
 
-### E05 — Volume×price matrix (INVERTED vs course)
+| Symbol | UU up+high | UD up+low | DU down+high | DD down+low |
+|--------|-----------|----------|--------------|-------------|
+| SPY | +0.14 | +0.27 | **+0.37** | +0.35 |
+| QQQ | +0.42 | +0.30 | **+0.52** | +0.50 |
+| AAPL | +0.61 | +0.48 | **+0.80** | +0.50 |
+| MSFT | +0.41 | +0.26 | **+0.95** | +0.53 |
 
-5-day drift by cell (SPY / QQQ / AAPL / MSFT): UU +0.14/+0.42/+0.61/+0.41,
-UD +0.27/+0.30/+0.48/+0.26, **DU +0.37/+0.52/+0.80/+0.95**, DD
-+0.35/+0.50/+0.50/+0.53. The course reads DU as "bearish, look to sell";
-it is the *best* cell everywhere — capitulation volume marks washouts that
-bounce (HP2). UD ("bull trap, stay cautious") is merely average.
+### E06–E10 — Trade-level summaries (pooled, 4 symbols)
 
-### E06 — Breakout entry quality (NUANCED)
+| Experiment | Strategy | Split | n | Win | Avg R | PF |
+|------------|----------|-------|---|-----|-------|----|
+| E06 | buildup breakout long | all | 239 | 55% | +0.03 | 1.15 |
+| E06 | power-move chase long | all | 109 | 42% | −0.12 | 0.84 |
+| E07 | aggressive touch | all / OOS | 745 / 203 | 53% / 54% | +0.16 / +0.16 | 1.41 / 1.37 |
+| E07 | **conservative rejection** | all / OOS | 89 / 31 | 64% / 64% | +0.33 / +0.26 | **2.28 / 1.69** |
+| E08 | fade first pullback | OOS | 90 | 40% | −0.15 | 0.80 |
+| E09 | raw inside-bar breakout | all / OOS | 1086 / 332 | 52% / 52% | +0.10 / +0.12 | 1.23 / 1.27 |
+| E09 | small-range at value | all | 51 | 48% | −0.09 | 0.80 |
+| E10 | raw pin | all | 876 | 46% | −0.02 | 0.97 |
+| E10 | trend/value filtered pin | all / OOS | 356 / 125 | 49% / 53% | +0.02 / +0.10 | 1.05 / 1.37 |
 
-All-symbols: buildup-breakout PF 1.15 (n=239) vs power-chase PF 0.84
-(n=109) — the course's "never chase power moves" directionally holds, but
-expectancy is thin (+0.03R) and OOS samples are small. Breakdown-shorts are
-too rare to judge (n=17).
+### E11 — Gap 5-day fill rates, |gap| ≥ 0.1% (pooled n)
 
-### E07 — Pullbacks: confirmation premium (CONFIRMED)
+full_up **65.9%** (2251) · part_up **72.0%** (2518) · full_dn **73.2%** (1398) · part_dn **82.4%** (2331). Per-symbol: full_up 64/65/66/69%, part_up 72/71/74/71%, full_dn 75/75/70/74%, part_dn 81/81/83/84% (SPY/QQQ/AAPL/MSFT).
 
-Aggressive (touch 20EMA in uptrend): PF 1.41, +0.16R (n=745).
-Conservative (+rejection candle): **PF 2.28, +0.33R (n=89)**, OOS PF 1.69.
-Waiting one bar for proof is the cheapest performance upgrade in the course.
+### Pending extension
 
-### E08 — Reversals: don't fade the first pullback (CONFIRMED)
+BTC-USD, ETH-USD, EURUSD=X, GC=F downloads pace through public-endpoint throttles; the runner auto-ingests any `data/<SYM>_10y.csv` present — rerun Quick start and these tables extend without code changes.
 
-Fade-first-flip longs: OOS PF 0.80, −0.15R (n=90). Structure-break shorts:
-11 trades total — directionally good (+0.54R) but ungradeably thin; the
-honest conclusion is "the prohibition is validated, the prescribed
-alternative is underpowered on daily bars."
+## ⚠️ Limitations (read before trusting any backtest)
 
-### E09 — Inside bars: the course's favourite is backwards
+- **L1 — stylised costs.** 5 bp + 2 bp per side suits liquid US equities; exotic names cost more — our costs flatter the strategies, if anything.
+- **L2 — unadjusted prices.** Corporate-action jumps (notably AAPL/MSFT splits) remain as noise; disclosed, not hidden.
+- **L3 — daily bars only.** Intraday claims (first-hour range, 5-minute gaps) are tested in daily analogue; intraday replication is future work.
+- **L4 — no delisted names.** Universe = 8 liquid symbols chosen ex-ante; no survivorship correction beyond that.
+- **L5 — S/R detector tail-sampled.** Zone clustering runs on the trailing window (last 400 bars) for compute reasons.
+- **L6 — US-centric equities in this release** (crypto/FX pending, see above).
 
-Raw inside-bar breakout (both directions): PF 1.23, +0.10R (n=1086) — a
-small genuine edge. Small-range-at-value subset: **PF 0.80, −0.09R (n=51)**.
-The course's preferred refinement destroys the edge (HP5 caveat: the value
-filter only fires in the detector's 400-bar tail, i.e. mostly OOS — still,
-the sign flip is the finding).
+## ❓ FAQ
 
-### E10 — Pin bars: nothing raw, a whisper filtered
+**Can I get rich with the 3 confirmed setups?** Probably not directly — edges are small after costs (PF 1.2–2.3) and this is educational research, not financial advice. The value is knowing what *not* to pay for.
 
-Raw: PF 0.97 (n=876) — exactly the "no edge" the literature predicts
-(Formiq 252 backtests; Secuora 2,118-trade verification PF 0.72).
-Trend/value-filtered: PF 1.05 (n=356), OOS PF 1.37 (n=125). A filter helps;
-a business it is not.
+**Why do down-days bounce?** Mean-reversion on daily equities: panic exhausts sellers and the bounce follows — the DU cell leads 5-day drift on all four symbols (+0.37% to +0.95%).
 
-### E11 — Gaps: the gradient, not the slogan (REJECTED "90%")
+**What is the "trap tax"?** ~5% of bars are failed inside-bar breakouts that trap breakout traders. Any breakout system pays this base rate before costs — size positions accordingly.
 
-5-day fill rates, |gap| ≥ 0.1% (n in brackets), SPY/QQQ/AAPL/MSFT:
+**Can I add my own strategy?** Yes — write a detector returning a boolean Series (signal at close *t*), pass it to `backtest_signals`, and the harness handles costs, OOS split and stats (see E07 for the template).
 
-- full_up: 64/65/66/69% — full_up fills *least*
-- part_up: 72/71/74/71%
-- full_dn: 75/75/70/74%
-- part_dn: 81/81/83/84% — partial gap-downs fill *most*
+**Why is out-of-sample sacred?** Because tuning on the test set manufactures edges. Our OOS is tested once and never re-tuned — when a strategy dies there (buildup breakouts did on SPY: −0.43R, p=0.013), we publish the death.
 
-Pooled (4 symbols): full_up 65.9% (2251), part_up 72.0% (2518), full_dn
-73.2% (1398), part_dn 82.4% (2331). The ordering is identical on all four
-symbols — a genuine regularity (HP3). "90% of gaps fill" is false;
-"partial gap-downs fill >80%" is the tradeable residue.
+## 🤝 Contributing
 
-## 5. Trade-level OOS summary (pooled, 4 symbols)
+Issues and PRs welcome: new symbols (drop a CSV in `data/`), new detectors, intraday replication (L3), crypto/FX tables. Please keep rules frozen-before-results and publish losers as losers. Run `python3 -m pytest tests/ -q` before submitting.
 
-Conservative pullback OOS PF 1.69 (n=31); aggressive OOS PF 1.37 (n=203).
-Raw inside-bar OOS PF 1.27 (n=332). Filtered pin OOS PF 1.37 (n=125).
-Fade-first OOS PF 0.80. No strategy survives costs with PF > 1.5 OOS except
-the small-sample conservative pullback — scale expectations accordingly.
+## 📜 License
 
-## 6. Hidden patterns (the PhD seeds)
+MIT — use it for anything, commercial included. See [LICENSE](LICENSE).
 
-- **HP1 — Downtrend snap-back.** Forward drift is maximal *after* down-regimes
-  on all four symbols. Daily equity trends mean-revert faster than courses
-  admit; any trend system needs an explicit oversold-bounce opponent model.
-- **HP2 — Capitulation-volume inversion.** High-volume down days precede the
-  best 5-day drift. Volume confirms *exhaustion*, not continuation, on this
-  timeframe — the course's 2×2 matrix needs transposing for daily bars.
-- **HP3 — Gap-fill gradient.** part_dn > part_up > full_dn > full_up, invariant
-  across symbols. Microstructure story: overnight partial gaps are liquidity
-  air-pockets; full gaps embed real information. Testable on intraday next.
-- **HP4 — The ~5% hikkake tax.** 2.2–2.8% of bars per side (≈5% total) are
-  failed inside-bar breakouts. Any inside-bar breakout system pays this base
-  trap rate before costs — size stops accordingly.
-- **HP5 — Zone abundance.** 35–52% of bars sit in ≥3-touch zones, so "trade
-  from value" cannot be selective by itself; confirmation (E07) does the work.
+## 📚 References
 
-## 7. How to reproduce
-
-```bash
-docker compose up research        # full pipeline: download -> 11 experiments -> results/
-# or locally:
-pip install -r requirements.txt
-PYTHONPATH=src python3 experiments/run_all.py --symbols SPY,QQQ,AAPL,MSFT --range 10y
-python3 -m pytest tests/ -q
-```
-
-Outputs: `results/summary.json` (per-symbol everything), `results/table.csv`
-(trade-level pooled stats), `results/SUMMARY.md` (digest). One Yahoo/Nasdaq
-request at a time; CSVs cache under `data/`.
-
-## 8. Limitations (explicit, not buried)
-
-L1 stylised costs (generous to illiquid names); L2 unadjusted prices
-(splits remain as jumps); L3 daily bars only — intraday claims (first-hour
-range, 5-min gaps) tested in daily analogue; L4 no delisted names; L5 S/R
-detector tail-sampled (last 400 bars); L6 four US-centric symbols in this
-release (crypto/FX extension §9).
-
-## 9. Pending extension
-
-`BTC-USD, ETH-USD, EURUSD=X, GC=F` downloads are pacing through public-endpoint
-throttles (`experiments/dl_background2.py`, log `data/dl2.log`). The runner
-auto-ingests any `data/<SYM>_10y.csv` present — rerun §7 when they land; §4
-tables will be extended, not rewritten.
-
-## References
-
-- Bailey, Borwein, López de Prado, Zhu — *The Probability of Backtest
-  Overfitting* (2014/2015).
-- Pardo, R. — *Design, Testing, and Optimization of Trading Systems* (1992,
-  walk-forward).
-- Park, C-H. & Irwin, S. — *The Profitability of Technical Analysis: A
-  Review* (SSRN, 2004).
+- Bailey, Borwein, López de Prado, Zhu — *The Probability of Backtest Overfitting* (2014/2015).
+- Pardo, R. — *Design, Testing, and Optimization of Trading Systems* (1992, walk-forward).
+- Park, C-H. & Irwin, S. — *The Profitability of Technical Analysis: A Review* (2004).
 - Arbi, R. — *A Reproducible Approach to Equity Backtesting* (UCT thesis, 2019).
-- QuantifiedStrategies — *Day Trading Price Action Strategy: Overview and
-  Backtest* (2026); PriceActionNinja — *Backtesting Forex Price Action*
-  (MT4/MT5 tick-data guide); ForexMechanics — *Strategy Testing Protocol*;
-  TradersSecondBrain — *How to Build and Backtest a Strategy That Survives
-  Live*; Pinetester — *How to Backtest Properly: 10 Rules* (2026).
-- Candlestick evidence: ResearchGate statistical analyses of Hammer/Shooting
-  Star on 60y S&P data; MDPI Mathematics 8(5):802 adaptive-candle study;
-  PatternTests inside-bar backtest (44,126 trades, median PF 0.99);
-  TradingSetupsReview inside-bar volume/support filters; Formiq pin-bar 252
-  backtests (USD/JPY); Secuora pin-bar verification (2,118 trades, PF 0.72).
-- Brooks, A. — *Trading Price Action* (Wiley) — breakout/pullback/breakdown
-  taxonomy underlying E06–E08 detectors.
-- Data tooling: `ranaroussi/yfinance` docs (reference implementation for the
-  Yahoo v8 schema this study's loader mirrors).
+- QuantifiedStrategies — *Day Trading Price Action Strategy: Overview and Backtest* (2026); PriceActionNinja — *Backtesting Forex Price Action* (MT4/MT5 tick-data guide); ForexMechanics — *Strategy Testing Protocol*; TradersSecondBrain — *How to Build and Backtest a Strategy That Survives Live*; Pinetester — *How to Backtest Properly: 10 Rules* (2026).
+- Candlestick evidence: statistical analyses of Hammer/Shooting Star on multi-decade S&P data; adaptive-candle study (MDPI Mathematics); inside-bar backtest (44,126 trades, median PF 0.99); inside-bar volume/support filters; pin-bar backtest batteries (252 runs; 2,118-trade verification, PF 0.72).
+- Brooks, A. — *Trading Price Action* (Wiley) — breakout/pullback taxonomy behind E06–E08.
+- Market-data access: public Yahoo Finance chart API v8 schema and Nasdaq historical API (see `src/pa_bench/data.py` for endpoint handling notes).
 
 ## Appendix A — Provenance
 
-- Research queries (sequential, rate-limit-safe): Exa/web, DuckDuckGo,
-  OpenResearch web+OpenAlex, arXiv+unified paper search, agent-reach,
-  Kaggle, Wikipedia, GSD, GitMCP — distinct keywords each; full notes in
-  `papers/METHOD.md`.
-- Live-access verification: `agent-reach_stock_quote` (AAPL 345.16, 2026-10-15),
-  CoinGecko BTC 30d series cross-check, direct Yahoo/Nasdaq curl probes.
-- Run: `results/bench4.out`; tests: `tests/test_smoke.py` (3 passed).
-- Nothing in this repo was copied from any local checkout: all code was
-  written fresh for this study (`git log` will show single-origin history).
+- Literature and best-practice review ran sequentially across web, academic (OpenAlex/arXiv/Crossref), practitioner and community sources with distinct queries per source; notes in `papers/METHOD.md`.
+- Live-access verification: direct endpoint probes for quote, crypto and FX series cross-checks; full 10y OHLCV pulls cached under `data/`.
+- Runs: `results/bench4.out`; tests: `tests/test_smoke.py` (3 passed); visuals: `experiments/make_assets.py`.
+- All code was written fresh for this study; history starts at the first commit of this repo.
